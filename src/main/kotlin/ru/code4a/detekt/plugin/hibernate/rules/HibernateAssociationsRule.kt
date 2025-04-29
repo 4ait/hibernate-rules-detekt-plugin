@@ -8,6 +8,7 @@ import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
 import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
+import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.impl.referencedProperty
@@ -29,9 +30,11 @@ import org.jetbrains.kotlin.psi.KtValueArgumentList
 import org.jetbrains.kotlin.psi.KtWhenEntry
 import org.jetbrains.kotlin.psi.KtWhenExpression
 import org.jetbrains.kotlin.resolve.BindingContext
+import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.bindingContextUtil.getReferenceTargets
 import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
+import org.jetbrains.kotlin.resolve.jvm.annotations.findJvmFieldAnnotation
 
 /**
  * This rule detects direct mutations of Hibernate association fields.
@@ -609,16 +612,52 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
   }
 
   private fun isHibernateField(expression: KtExpression): Boolean {
+    val bindingContext = bindingContext
+    if (bindingContext == BindingContext.EMPTY) return false
+
     val targets = expression.getReferenceTargets(bindingContext)
-    return targets
-      .filter {
-        it.referencedProperty != null
-      }
-      .any { descriptor ->
-        descriptor.referencedProperty!!.annotations.any {
-          hibernateAnnotations.contains(it.fqName?.asString())
+
+    return targets.any { descriptor ->
+      when (descriptor) {
+        // Handle regular property descriptors
+        is PropertyDescriptor -> {
+          // Check annotations on the property itself
+          val propertyAnnotations = descriptor.annotations.mapNotNull { it.fqName?.asString() }
+
+          // Check annotations on constructor parameter if this is a constructor property
+          val constructorParameterAnnotations = descriptor.backingField?.annotations?.mapNotNull {
+            it.fqName?.asString()
+          } ?: emptyList()
+
+          // Check if this is a primary constructor property parameter
+          val primaryCtorParamAnnotations =
+            if (descriptor.containingDeclaration is ClassDescriptor) {
+              val classDescriptor = descriptor.containingDeclaration as ClassDescriptor
+              val primaryCtor = classDescriptor.constructors.firstOrNull { it.isPrimary }
+
+              primaryCtor?.valueParameters
+                ?.find {
+                  it.name == descriptor.name
+                }
+                ?.annotations
+                ?.mapNotNull {
+                  it.fqName?.asString()
+                } ?: emptyList()
+            } else {
+              emptyList()
+            }
+
+          // Combine all annotation sources
+          val allAnnotations = propertyAnnotations + constructorParameterAnnotations + primaryCtorParamAnnotations
+
+          allAnnotations.any { fqName ->
+            hibernateAnnotations.contains(fqName)
+          }
         }
+
+        else -> false
       }
+    }
   }
 
   private fun isHibernateCollectionField(expression: KtExpression): Boolean {

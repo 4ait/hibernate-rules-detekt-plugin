@@ -380,6 +380,166 @@ class HibernateAssociationsRuleTest(
   }
 
   @Test
+  fun `should not allow direct set collection if declared in constructor with this`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class OneToMany
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.OneToMany
+
+                @Entity
+                class Parent(
+                   @OneToMany
+                   private var childrens: MutableSet<Child> = mutableSetOf()
+                ) {
+                    fun notAllowed(childs: MutableSet<Child>) {
+                        this.childrens = childs
+                    }
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(1, finding.size)
+  }
+
+  @Test
+  fun `should not allow direct set collection if declared in constructor`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class OneToMany
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.OneToMany
+
+                @Entity
+                class Parent(
+                   @OneToMany
+                   private var childrens: MutableSet<Child> = mutableSetOf()
+                ) {
+                    fun notAllowed(childs: MutableSet<Child>) {
+                        childrens = childs
+                    }
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(1, finding.size)
+  }
+
+  @Test
+  fun `should not allow add if declared in constructor`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class OneToMany
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.OneToMany
+
+                @Entity
+                class Parent(
+                   @OneToMany
+                   private var childrens: MutableSet<Child> = mutableSetOf()
+                ) {
+                    fun notAllowed(childs: MutableSet<Child>) {
+                        childrens.addAll(childs)
+                    }
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(1, finding.size)
+  }
+
+  @Test
+  fun `should not allow add if declared in constructor with this`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class OneToMany
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.OneToMany
+
+                @Entity
+                class Parent(
+                   @OneToMany
+                   private var childrens: MutableSet<Child> = mutableSetOf()
+                ) {
+                    fun notAllowed(childs: MutableSet<Child>) {
+                        this.childrens.addAll(childs)
+                    }
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(1, finding.size)
+  }
+
+  @Test
   fun `should not allow direct set reference with this`() {
     @Language("kotlin")
     val fileContents =

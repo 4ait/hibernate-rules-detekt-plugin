@@ -621,36 +621,7 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
       when (descriptor) {
         // Handle regular property descriptors
         is PropertyDescriptor -> {
-          // Check annotations on the property itself
-          val propertyAnnotations = descriptor.annotations.mapNotNull { it.fqName?.asString() }
-
-          // Check annotations on constructor parameter if this is a constructor property
-          val constructorParameterAnnotations = descriptor.backingField?.annotations?.mapNotNull {
-            it.fqName?.asString()
-          } ?: emptyList()
-
-          // Check if this is a primary constructor property parameter
-          val primaryCtorParamAnnotations =
-            if (descriptor.containingDeclaration is ClassDescriptor) {
-              val classDescriptor = descriptor.containingDeclaration as ClassDescriptor
-              val primaryCtor = classDescriptor.constructors.firstOrNull { it.isPrimary }
-
-              primaryCtor?.valueParameters
-                ?.find {
-                  it.name == descriptor.name
-                }
-                ?.annotations
-                ?.mapNotNull {
-                  it.fqName?.asString()
-                } ?: emptyList()
-            } else {
-              emptyList()
-            }
-
-          // Combine all annotation sources
-          val allAnnotations = propertyAnnotations + constructorParameterAnnotations + primaryCtorParamAnnotations
-
-          allAnnotations.any { fqName ->
+          descriptor.getAllAssociatedAnnotations().any { fqName ->
             hibernateAnnotations.contains(fqName)
           }
         }
@@ -664,25 +635,54 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
     val bindingContext = bindingContext
     if (bindingContext == BindingContext.EMPTY) return false
 
-    val propertyDescriptor = when (expression) {
+    val annotations = when (expression) {
       is KtNameReferenceExpression -> {
         val targets = expression.getReferenceTargets(bindingContext)
-        targets.filterIsInstance<PropertyDescriptor>().firstOrNull()
+        targets.filterIsInstance<PropertyDescriptor>().firstOrNull()?.getAllAssociatedAnnotations()
       }
 
       is KtDotQualifiedExpression -> {
         val selectorExpression = expression.selectorExpression as? KtNameReferenceExpression ?: return false
         val targets = selectorExpression.getReferenceTargets(bindingContext)
-        targets.filterIsInstance<PropertyDescriptor>().firstOrNull()
+        targets.filterIsInstance<PropertyDescriptor>().firstOrNull()?.getAllAssociatedAnnotations()
       }
 
       else -> null
     } ?: return false
 
-    return propertyDescriptor.annotations.any { annotation ->
-      val annotationFqName = annotation.fqName?.asString() ?: return@any false
-      collectionAnnotations.contains(annotationFqName)
+    return annotations.any { annotation ->
+      collectionAnnotations.contains(annotation)
     }
+  }
+
+  fun PropertyDescriptor.getAllAssociatedAnnotations(): List<String> {
+    // Check annotations on the property itself
+    val propertyAnnotations = annotations.mapNotNull { it.fqName?.asString() }
+
+    // Check annotations on constructor parameter if this is a constructor property
+    val constructorParameterAnnotations = backingField?.annotations?.mapNotNull {
+      it.fqName?.asString()
+    } ?: emptyList()
+
+    // Check if this is a primary constructor property parameter
+    val primaryCtorParamAnnotations =
+      if (containingDeclaration is ClassDescriptor) {
+        val classDescriptor = containingDeclaration as ClassDescriptor
+        val primaryCtor = classDescriptor.constructors.firstOrNull { it.isPrimary }
+
+        primaryCtor?.valueParameters
+          ?.find {
+            it.name == name
+          }
+          ?.annotations
+          ?.mapNotNull {
+            it.fqName?.asString()
+          } ?: emptyList()
+      } else {
+        emptyList()
+      }
+
+    return propertyAnnotations + constructorParameterAnnotations + primaryCtorParamAnnotations
   }
 
   companion object {

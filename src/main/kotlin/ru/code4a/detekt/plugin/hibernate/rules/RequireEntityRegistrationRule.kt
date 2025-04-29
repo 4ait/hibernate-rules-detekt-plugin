@@ -779,43 +779,6 @@ class RequireEntityRegistrationRule(config: Config) : Rule(config) {
       if (verifiedFactoryMethods.contains(qualifiedName)) {
         return true
       }
-
-      // Special handling for factory methods that return registered entities
-      // This is a more aggressive approach to handle the failing test cases
-      if (receiverText.contains("Factory") && (calleeText.startsWith("create") || calleeText.startsWith("get"))) {
-        // Look for the class definition
-        val factoryClass = containingFile.findElementAt(parent.textOffset)?.getParentOfType<KtClass>()
-        if (factoryClass != null) {
-          // Look for the method definition
-          val method = factoryClass.body?.functions?.find { it.name == calleeText }
-          if (method != null) {
-            // Check if the method returns an entity
-            val returnType = method.typeReference?.text
-            if (returnType != null) {
-              // Check if the method contains a return statement with registration
-              var hasRegistrationReturn = false
-              method.accept(object : KtTreeVisitorVoid() {
-                override fun visitReturnExpression(returnExpr: KtReturnExpression) {
-                  super.visitReturnExpression(returnExpr)
-
-                  val returnValue = returnExpr.returnedExpression
-                  if (returnValue is KtDotQualifiedExpression) {
-                    val selector = returnValue.selectorExpression
-                    if (selector is KtCallExpression && selector.calleeExpression?.text == methodName) {
-                      hasRegistrationReturn = true
-                    }
-                  }
-                }
-              })
-
-              if (hasRegistrationReturn) {
-                verifiedFactoryMethods.add("$receiverText.$calleeText")
-                return true
-              }
-            }
-          }
-        }
-      }
     }
 
     return false

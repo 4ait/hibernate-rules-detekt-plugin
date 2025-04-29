@@ -124,7 +124,4 @@ jreleaser {
 
 tasks.test {
   useJUnitPlatform()
-
-  testLogging.showStandardStreams = true
-  testLogging.exceptionFormat = TestExceptionFormat.FULL
 }

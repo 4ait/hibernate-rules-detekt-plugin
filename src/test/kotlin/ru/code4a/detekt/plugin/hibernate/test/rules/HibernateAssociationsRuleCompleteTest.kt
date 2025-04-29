@@ -145,6 +145,7 @@ class HibernateAssociationsRuleCompleteTest(
 
         class ArrayList<T>
         class HashSet<T>
+        class HashMap<K, V>
       """.trimIndent(),
       """
         package java.util
@@ -157,7 +158,7 @@ class HibernateAssociationsRuleCompleteTest(
         import javax.persistence.ManyToMany
         import kotlin.collections.ArrayList
         import kotlin.collections.HashSet
-        import java.util.HashMap
+        import kotlin.collections.HashMap
 
         @Entity
         class CollectionTypes {

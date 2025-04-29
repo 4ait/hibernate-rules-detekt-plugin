@@ -65,6 +65,7 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
     "kotlin.collections.ArrayList",
     "kotlin.collections.HashSet",
     "kotlin.collections.LinkedHashSet",
+    "kotlin.collections.HashMap",
 
     // Factory methods
     "kotlin.collections.mutableListOf",
@@ -429,8 +430,6 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
     val callExpression = list.parent as? KtCallExpression ?: return
     val resolvedCall =
       callExpression.getResolvedCall(bindingContext) ?: callExpression.calleeExpression?.getResolvedCall(bindingContext)
-
-    println(callExpression.text)
 
     if (resolvedCall != null) {
       val callFqName = resolvedCall.resultingDescriptor.fqNameSafe.asString()

@@ -52,7 +52,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -99,7 +99,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -149,7 +149,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -193,7 +193,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -241,7 +241,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -292,7 +292,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -343,7 +343,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -387,7 +387,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -437,7 +437,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -481,7 +481,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -534,7 +534,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -584,11 +584,11 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
-    Assertions.assertEquals(2, finding.size)
+    Assertions.assertEquals(1, finding.size)
   }
 
   @Test
@@ -632,11 +632,11 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
-    Assertions.assertEquals(2, finding.size)
+    Assertions.assertEquals(1, finding.size)
   }
 
   @Test
@@ -680,7 +680,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -732,11 +732,11 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
-    Assertions.assertEquals(2, finding.size)
+    Assertions.assertEquals(1, finding.size)
   }
 
   @Test
@@ -794,11 +794,11 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
-    Assertions.assertEquals(3, finding.size)
+    Assertions.assertEquals(1, finding.size)
   }
 
   @Test
@@ -840,7 +840,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -887,7 +887,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -940,7 +940,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -992,7 +992,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1044,7 +1044,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1090,7 +1090,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1142,7 +1142,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1188,7 +1188,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1243,7 +1243,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1295,7 +1295,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1345,7 +1345,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1394,7 +1394,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1448,11 +1448,72 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
     Assertions.assertEquals(0, finding.size)
+  }
+
+  @Test
+  fun `test DSL-style entity creation - should report when entity is created in DSL with registration`() {
+    @Language("kotlin")
+    val fileContents = listOf(
+      """
+        package javax.persistence
+
+        annotation class Entity
+      """.trimIndent(),
+      """
+        package com.example
+
+        class EntityTracker {
+          companion object {
+            fun register(entity: Any) {
+              // Registration logic
+            }
+          }
+        }
+      """.trimIndent(),
+      """
+        import javax.persistence.Entity
+        import com.example.EntityTracker
+
+        @Entity
+        class User private constructor() {
+          var name: String = ""
+          var email: String = ""
+
+          companion object {
+            // Factory method that creates, configures, and registers the entity
+            fun create(configure: User.() -> Unit): User {
+              val user = User()
+              user.configure()
+              EntityTracker.register(user) // Too late
+              return user
+            }
+          }
+        }
+
+        class UserService {
+          fun createUser() {
+            // Use the factory method instead of a separate builder
+            val user = User.create {
+              name = "John"
+              email = "john@example.com"
+            }
+          }
+        }
+      """.trimIndent()
+    )
+
+    val finding = RequireEntityRegistrationRule(
+      TestConfig(
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
+      )
+    ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(1, finding.size)
   }
 
   @Test
@@ -1488,8 +1549,8 @@ class RequireEntityRegistrationRuleComplexTest(
             // Factory method that creates, configures, and registers the entity
             fun create(configure: User.() -> Unit): User {
               val user = User()
-              user.configure()
               EntityTracker.register(user)
+              user.configure()
               return user
             }
           }
@@ -1509,7 +1570,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1557,7 +1618,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1613,7 +1674,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1663,7 +1724,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1717,7 +1778,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1769,7 +1830,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1836,7 +1897,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1897,7 +1958,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 
@@ -1936,36 +1997,31 @@ class RequireEntityRegistrationRuleComplexTest(
 
         class UserService {
           fun createUser(name: String): User {
-            return User(name).apply {
+            return EntityTracker.register(User(name)).apply { // Correct: Entity registered in scope function
               email = "user@example.com"
               age = 30
-              EntityTracker.register(this) // Correct: Entity registered in scope function
             }
           }
 
           fun createUserWithLet(name: String): User {
-            return User(name).let {
+            return EntityTracker.register(User(name)).let { // Correct: Entity registered in scope function
               it.email = "user@example.com"
               it.age = 30
-              EntityTracker.register(it) // Correct: Entity registered in scope function
-              it
             }
           }
 
           fun createUserWithRun(name: String): User {
-            return User(name).run {
+            return EntityTracker.register(User(name)).run { // Correct: Entity registered in scope function
               email = "user@example.com"
               age = 30
-              EntityTracker.register(this) // Correct: Entity registered in scope function
-              this
+
             }
           }
 
           fun createUserWithAlso(name: String): User {
-            return User(name).also {
+            return EntityTracker.register(User(name)).also { // Correct: Entity registered in scope function
               it.email = "user@example.com"
               it.age = 30
-              EntityTracker.register(it) // Correct: Entity registered in scope function
             }
           }
         }
@@ -1974,7 +2030,7 @@ class RequireEntityRegistrationRuleComplexTest(
 
     val finding = RequireEntityRegistrationRule(
       TestConfig(
-        "requiredStaticMethod" to "com.example.EntityTracker.register"
+        "requiredStaticMethod" to "com.example.EntityTracker.Companion.register"
       )
     ).lintAllWithContextAndPrint(env, fileContents)
 

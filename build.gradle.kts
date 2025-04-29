@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jreleaser.model.Active
 
 plugins {
@@ -123,4 +124,7 @@ jreleaser {
 
 tasks.test {
   useJUnitPlatform()
+
+  testLogging.showStandardStreams = true
+  testLogging.exceptionFormat = TestExceptionFormat.FULL
 }

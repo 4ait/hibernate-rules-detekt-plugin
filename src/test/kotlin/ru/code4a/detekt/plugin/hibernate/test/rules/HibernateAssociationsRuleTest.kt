@@ -300,6 +300,46 @@ class HibernateAssociationsRuleTest(
   }
 
   @Test
+  fun `should not allow direct set reference with this`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class ManyToOne
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.ManyToOne
+
+                @Entity
+                class Parent {
+                    @ManyToOne
+                    private var children: Child? = null
+
+                    fun notAllowed(child: Child) {
+                        this.children = child
+                    }
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(1, finding.size)
+  }
+
+  @Test
   fun `should allow dirty map hack with allowed extention`() {
     @Language("kotlin")
     val fileContents =

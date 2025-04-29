@@ -8,6 +8,7 @@ import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
 import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
+import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.descriptors.impl.referencedProperty
 import org.jetbrains.kotlin.lexer.KtTokens
@@ -22,6 +23,7 @@ import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.psi.KtPropertyAccessor
 import org.jetbrains.kotlin.psi.KtReturnExpression
+import org.jetbrains.kotlin.psi.KtThisExpression
 import org.jetbrains.kotlin.psi.KtTryExpression
 import org.jetbrains.kotlin.psi.KtValueArgumentList
 import org.jetbrains.kotlin.psi.KtWhenEntry
@@ -500,7 +502,7 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
   }
 
   private fun checkLeftSideOfAssignment(dotExpression: KtDotQualifiedExpression, assignment: KtBinaryExpression) {
-    if (isHibernateField(dotExpression.receiverExpression)) {
+    if (isHibernateField(dotExpression.selectorExpression ?: dotExpression.receiverExpression)) {
       val isCollectionAccess = dotExpression.text.contains("[") ||
         (dotExpression.selectorExpression?.text in setOf("[]", "get"))
 
@@ -606,8 +608,8 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
     }
   }
 
-  private fun isHibernateField(receiverExpression: KtExpression): Boolean {
-    val targets = receiverExpression.getReferenceTargets(bindingContext)
+  private fun isHibernateField(expression: KtExpression): Boolean {
+    val targets = expression.getReferenceTargets(bindingContext)
     return targets
       .filter {
         it.referencedProperty != null

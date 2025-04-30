@@ -8,6 +8,7 @@ import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
 import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
+import io.gitlab.arturbosch.detekt.rules.fqNameOrNull
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.lexer.KtTokens
@@ -208,6 +209,17 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
     "jakarta.persistence.ManyToMany"
   )
 
+  private val allowedCollectionsTypes = setOf(
+    "kotlin.collections.MutableList",
+    "kotlin.collections.MutableSet",
+    "kotlin.collections.MutableMap",
+    "kotlin.collections.ArrayList",
+    "kotlin.collections.LinkedHashSet",
+    "kotlin.collections.HashSet",
+    "kotlin.collections.HashMap",
+    "kotlin.collections.LinkedHashMap"
+  )
+
   /**
    * Annotations that define an entity.
    */
@@ -237,6 +249,16 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
               )
             )
           }
+
+          if (propertyDescriptor?.returnType?.fqNameOrNull()?.asString() !in allowedCollectionsTypes) {
+            report(
+              CodeSmell(
+                issue,
+                Entity.from(property),
+                "Hibernate collection type must be mutable and supported by Hibernate"
+              )
+            )
+          }
         }
       }
       klass.primaryConstructor?.let { primaryConstructor ->
@@ -250,6 +272,16 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
                   issue,
                   Entity.from(parameter),
                   "Hibernate collection property cannot be nullable."
+                )
+              )
+            }
+
+            if (propertyDescriptor?.returnType?.fqNameOrNull()?.asString() !in allowedCollectionsTypes) {
+              report(
+                CodeSmell(
+                  issue,
+                  Entity.from(parameter),
+                  "Hibernate collection type must be mutable and supported by Hibernate"
                 )
               )
             }

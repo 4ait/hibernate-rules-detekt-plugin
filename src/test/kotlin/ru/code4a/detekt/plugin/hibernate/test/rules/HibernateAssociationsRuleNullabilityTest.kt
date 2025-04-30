@@ -68,7 +68,7 @@ class HibernateAssociationsRuleNullabilityTest(
           @Entity
           class Student {
               @ManyToMany
-              private var courses: Set<Course>? = setOf()
+              private var courses: MutableSet<Course>? = mutableSetOf()
           }
 
           @Entity
@@ -105,7 +105,7 @@ class HibernateAssociationsRuleNullabilityTest(
           @Entity
           class Parent(
               @OneToMany
-              private var children: List<Child>? = listOf()
+              private var children: MutableList<Child>? = mutableListOf()
           )
 
           @Entity
@@ -142,7 +142,7 @@ class HibernateAssociationsRuleNullabilityTest(
           @Entity
           class Student(
               @ManyToMany
-              private var courses: Set<Course>? = setOf()
+              private var courses: MutableSet<Course>? = mutableSetOf()
           )
 
           @Entity
@@ -179,7 +179,7 @@ class HibernateAssociationsRuleNullabilityTest(
           @Entity
           class Student(
               @ManyToMany
-              private var courses: Set<Course> = setOf()
+              private var courses: MutableSet<Course> = mutableSetOf()
           )
 
           @Entity
@@ -215,7 +215,7 @@ class HibernateAssociationsRuleNullabilityTest(
           @Entity
           class Parent {
               @OneToMany
-              private var children: List<Child>? = listOf()
+              private var children: MutableList<Child>? = mutableListOf()
           }
 
           @Entity
@@ -257,7 +257,7 @@ class HibernateAssociationsRuleNullabilityTest(
               private var children: MutableList<Child> = mutableListOf()
 
               @ManyToMany
-              private var relatedEntities: Set<Related> = setOf()
+              private var relatedEntities: MutableSet<Related> = mutableSetOf()
           }
 
           @Entity
@@ -380,10 +380,10 @@ class HibernateAssociationsRuleNullabilityTest(
           @Entity
           class ComplexEntity {
               @OneToMany
-              private var children: List<Child>? = listOf()
+              private var children: MutableList<Child>? = mutableListOf()
 
               @ManyToMany
-              private var partners: Set<Partner>? = setOf()
+              private var partners: MutableSet<Partner>? = mutableSetOf()
           }
 
           @Entity
@@ -424,10 +424,10 @@ class HibernateAssociationsRuleNullabilityTest(
           @Entity
           class MixedEntity(
               @OneToMany
-              private var children: List<Child>? = listOf()
+              private var children: MutableList<Child>? = mutableListOf()
           ) {
               @ManyToMany
-              private var partners: Set<Partner>? = setOf()
+              private var partners: MutableSet<Partner>? = mutableSetOf()
           }
 
           @Entity

@@ -56,6 +56,48 @@ class HibernateEntityPropertiesRuleTest(
   }
 
   @Test
+  fun `properties in entity should be private var in constructor`() {
+    @Language("kotlin")
+    val fileContents = listOf(
+      """
+            package javax.persistence
+
+            annotation class Entity
+        """.trimIndent(), """
+            import javax.persistence.Entity
+
+            @Entity
+            class User(
+                private var id: Long = 0,          // Correct
+                private var name: String = "",      // Correct
+                var address: String = "",          // Incorrect: not private
+                private val email: String = "",     // Incorrect: not var
+                val phone: String = ""            // Incorrect: not private and not var
+            )
+        """.trimIndent()
+    )
+
+    val findings =
+      HibernateEntityPropertiesRule(
+        TestConfig(
+          "active" to "true"
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(3, findings.size)
+    // Check that non-private property is reported
+    Assertions.assertTrue(findings.any { it.message.contains("address") && it.message.contains("must be private") })
+    // Check that val property is reported
+    Assertions.assertTrue(findings.any { it.message.contains("email") && it.message.contains("must be var") })
+    // Check that both issues are reported for non-private val
+    Assertions.assertTrue(findings.any {
+      it.message.contains("phone") &&
+        it.message.contains("must be private") &&
+        it.message.contains("must be var")
+    })
+  }
+
+  @Test
   fun `properties in non-entity class should not be reported`() {
     @Language("kotlin")
     val fileContents = listOf(
@@ -72,6 +114,35 @@ class HibernateEntityPropertiesRuleTest(
                 val name: String = ""              // Should not be reported
                 public var address: String = ""    // Should not be reported
             }
+        """.trimIndent()
+    )
+
+    val findings = HibernateEntityPropertiesRule(
+      TestConfig(
+        "active" to "true"
+      )
+    ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(0, findings.size)
+  }
+
+  @Test
+  fun `properties in non-entity class should not be reported in constructor`() {
+    @Language("kotlin")
+    val fileContents = listOf(
+      """
+            package javax.persistence
+
+            annotation class Entity
+        """.trimIndent(), """
+            import javax.persistence.Entity
+
+            // No @Entity annotation here
+            class RegularClass(
+                var id: Long = 0,                  // Should not be reported
+                val name: String = "",              // Should not be reported
+                public var address: String = ""    // Should not be reported
+            )
         """.trimIndent()
     )
 
@@ -152,6 +223,41 @@ class HibernateEntityPropertiesRuleTest(
   }
 
   @Test
+  fun `properties with different visibility modifiers in constructor`() {
+    @Language("kotlin")
+    val fileContents = listOf(
+      """
+            package javax.persistence
+
+            annotation class Entity
+        """.trimIndent(), """
+            import javax.persistence.Entity
+
+            @Entity
+            class User(
+                private var id: Long = 0,          // Correct
+                public var name: String = "",       // Incorrect: not private
+                protected var email: String = "",   // Incorrect: not private
+                internal var phone: String = "",    // Incorrect: not private
+                var address: String = ""          // Incorrect: not private (implicit public)
+            )
+        """.trimIndent()
+    )
+
+    val findings = HibernateEntityPropertiesRule(
+      TestConfig(
+        "active" to "true"
+      )
+    ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(4, findings.size)
+    Assertions.assertTrue(findings.any { it.message.contains("name") && it.message.contains("must be private") })
+    Assertions.assertTrue(findings.any { it.message.contains("email") && it.message.contains("must be private") })
+    Assertions.assertTrue(findings.any { it.message.contains("phone") && it.message.contains("must be private") })
+    Assertions.assertTrue(findings.any { it.message.contains("address") && it.message.contains("must be private") })
+  }
+
+  @Test
   fun `entity with all correct properties`() {
     @Language("kotlin")
     val fileContents = listOf(
@@ -168,6 +274,39 @@ class HibernateEntityPropertiesRuleTest(
                 private var name: String = ""
                 private var createdAt: Long = 0
 
+                companion object {
+                    const val ID_COLUMN = "id"
+                }
+            }
+        """.trimIndent()
+    )
+
+    val findings = HibernateEntityPropertiesRule(
+      TestConfig(
+        "active" to "true"
+      )
+    ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(0, findings.size)
+  }
+
+  @Test
+  fun `entity with all correct properties in constructor`() {
+    @Language("kotlin")
+    val fileContents = listOf(
+      """
+            package javax.persistence
+
+            annotation class Entity
+        """.trimIndent(), """
+            import javax.persistence.Entity
+
+            @Entity
+            class PerfectEntity(
+                private var id: Long = 0,
+                private var name: String = "",
+                private var createdAt: Long = 0
+            ) {
                 companion object {
                     const val ID_COLUMN = "id"
                 }
@@ -226,6 +365,47 @@ class HibernateEntityPropertiesRuleTest(
   }
 
   @Test
+  fun `multiple entity classes in one file in constructor`() {
+    @Language("kotlin")
+    val fileContents = listOf(
+      """
+            package javax.persistence
+
+            annotation class Entity
+        """.trimIndent(), """
+            import javax.persistence.Entity
+
+            @Entity
+            class User(
+                private var id: Long = 0,
+                val name: String = ""  // Incorrect: not var
+            )
+
+            @Entity
+            class Address(
+                private var id: Long = 0,
+                var street: String = ""  // Incorrect: not private
+            )
+
+            // Not an entity, should be ignored
+            class Helper(
+                val util: String = ""
+            )
+        """.trimIndent()
+    )
+
+    val findings = HibernateEntityPropertiesRule(
+      TestConfig(
+        "active" to "true"
+      )
+    ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(2, findings.size)
+    Assertions.assertTrue(findings.any { it.message.contains("name") && it.message.contains("must be var") })
+    Assertions.assertTrue(findings.any { it.message.contains("street") && it.message.contains("must be private") })
+  }
+
+  @Test
   fun `entity with different property types`() {
     @Language("kotlin")
     val fileContents = listOf(
@@ -261,6 +441,41 @@ class HibernateEntityPropertiesRuleTest(
   }
 
   @Test
+  fun `entity with different property types in constructor`() {
+    @Language("kotlin")
+    val fileContents = listOf(
+      """
+            package javax.persistence
+
+            annotation class Entity
+
+            class CustomType
+        """.trimIndent(), """
+            import javax.persistence.Entity
+            import javax.persistence.CustomType
+
+            @Entity
+            class ComplexEntity(
+                private var id: Long = 0,                     // Correct
+                private var names: List<String> = listOf(),    // Correct
+                private var data: Map<String, Int> = mapOf(),  // Correct
+                private var custom: CustomType? = null,        // Correct
+                val items: Set<String> = setOf()             // Incorrect: not var
+            )
+        """.trimIndent()
+    )
+
+    val findings = HibernateEntityPropertiesRule(
+      TestConfig(
+        "active" to "true"
+      )
+    ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(1, findings.size)
+    Assertions.assertTrue(findings.any { it.message.contains("items") && it.message.contains("must be var") })
+  }
+
+  @Test
   fun `inactive rule should not report anything`() {
     @Language("kotlin")
     val fileContents = listOf(
@@ -276,6 +491,34 @@ class HibernateEntityPropertiesRuleTest(
                 val id: Long = 0          // Would normally be reported
                 public var name: String = ""  // Would normally be reported
             }
+        """.trimIndent()
+    )
+
+    val findings = HibernateEntityPropertiesRule(
+      TestConfig(
+        "active" to "false"
+      )
+    ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(0, findings.size)
+  }
+
+  @Test
+  fun `inactive rule should not report anything in constructor`() {
+    @Language("kotlin")
+    val fileContents = listOf(
+      """
+            package javax.persistence
+
+            annotation class Entity
+        """.trimIndent(), """
+            import javax.persistence.Entity
+
+            @Entity
+            class User(
+                val id: Long = 0,          // Would normally be reported
+                public var name: String = ""  // Would normally be reported
+            )
         """.trimIndent()
     )
 

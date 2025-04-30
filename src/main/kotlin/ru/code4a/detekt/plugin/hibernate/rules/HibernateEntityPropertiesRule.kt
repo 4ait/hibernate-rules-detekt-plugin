@@ -8,7 +8,9 @@ import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
 import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtParameter
 import org.jetbrains.kotlin.psi.KtProperty
+import org.jetbrains.kotlin.psi.psiUtil.isPropertyParameter
 import org.jetbrains.kotlin.psi.psiUtil.visibilityModifierTypeOrDefault
 
 /**
@@ -51,6 +53,13 @@ class HibernateEntityPropertiesRule(config: Config = Config.empty) : Rule(config
       klass.body?.properties?.forEach { property ->
         checkProperty(property)
       }
+      klass.primaryConstructor?.let { primaryConstructor ->
+        primaryConstructor.valueParameters.forEach { parameter ->
+          if (parameter.isPropertyParameter()) {
+            checkValueParameter(parameter)
+          }
+        }
+      }
     }
   }
 
@@ -69,6 +78,24 @@ class HibernateEntityPropertiesRule(config: Config = Config.empty) : Rule(config
       }
 
       report(CodeSmell(issue, Entity.from(property), message))
+    }
+  }
+
+  private fun checkValueParameter(parameter: KtParameter) {
+    // Check if property is private
+    val isPrivate = parameter.visibilityModifierTypeOrDefault().toString() == "private"
+
+    // Check if property is var (mutable)
+    val isVar = parameter.valOrVarKeyword?.text == "var"
+
+    if (!isPrivate || !isVar) {
+      val message = buildString {
+        append("Constructor property '${parameter.name}' in Entity class ")
+        if (!isPrivate) append("must be private. ")
+        if (!isVar) append("must be var. ")
+      }
+
+      report(CodeSmell(issue, Entity.from(parameter), message))
     }
   }
 }

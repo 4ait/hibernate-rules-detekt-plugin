@@ -98,7 +98,6 @@ class Parent {
   fun addChild(child: Child) {
     val copy = ArrayList(children)
     copy.add(child)
-    children = copy
   }
 
   fun getChildren(): List<Child> {

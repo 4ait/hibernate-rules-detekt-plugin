@@ -8,34 +8,38 @@ import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
 import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
-import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
-import org.jetbrains.kotlin.descriptors.impl.referencedProperty
 import org.jetbrains.kotlin.lexer.KtTokens
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtArrayAccessExpression
 import org.jetbrains.kotlin.psi.KtBinaryExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
+import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtLambdaExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
+import org.jetbrains.kotlin.psi.KtParameter
 import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.psi.KtPropertyAccessor
 import org.jetbrains.kotlin.psi.KtReturnExpression
-import org.jetbrains.kotlin.psi.KtThisExpression
 import org.jetbrains.kotlin.psi.KtTryExpression
 import org.jetbrains.kotlin.psi.KtValueArgumentList
 import org.jetbrains.kotlin.psi.KtWhenEntry
 import org.jetbrains.kotlin.psi.KtWhenExpression
+import org.jetbrains.kotlin.psi.psiUtil.isPropertyParameter
 import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.bindingContextUtil.getReferenceTargets
 import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
-import org.jetbrains.kotlin.resolve.jvm.annotations.findJvmFieldAnnotation
+import org.jetbrains.kotlin.types.isNullable
 import ru.code4a.detekt.plugin.hibernate.extentions.psi.getAllAssociatedAnnotations
+import ru.code4a.detekt.plugin.hibernate.extentions.psi.getClassDescriptor
+import ru.code4a.detekt.plugin.hibernate.extentions.psi.getPropertyDescriptor
+import ru.code4a.detekt.plugin.hibernate.extentions.psi.getVariableDescriptor
+import ru.code4a.detekt.plugin.hibernate.extentions.psi.hasAnnotationAnyOf
 
 /**
  * This rule detects direct mutations of Hibernate association fields.
@@ -203,6 +207,57 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
     "jakarta.persistence.OneToMany",
     "jakarta.persistence.ManyToMany"
   )
+
+  /**
+   * Annotations that define an entity.
+   */
+  private val entityAnnotations = setOf(
+    "jakarta.persistence.Entity",
+    "javax.persistence.Entity"
+  )
+
+  private val entityAnnotationsFqNames = entityAnnotations.map { FqName(it) }.toSet()
+
+  override fun visitClass(klass: KtClass) {
+    super.visitClass(klass)
+
+    val isEntity = klass.hasAnnotationAnyOf(bindingContext, entityAnnotationsFqNames)
+
+    if (isEntity) {
+      klass.body?.properties?.forEach { property ->
+        if (isHibernateCollectionField(property)) {
+          val propertyDescriptor = property.getPropertyDescriptor(bindingContext)
+
+          if (propertyDescriptor?.returnType?.isNullable() == true) {
+            report(
+              CodeSmell(
+                issue,
+                Entity.from(property),
+                "Hibernate collection property cannot be nullable."
+              )
+            )
+          }
+        }
+      }
+      klass.primaryConstructor?.let { primaryConstructor ->
+        primaryConstructor.valueParameters.forEach { parameter ->
+          if (parameter.isPropertyParameter() && isHibernateCollectionField(parameter)) {
+            val propertyDescriptor = parameter.getVariableDescriptor(bindingContext)
+
+            if (propertyDescriptor?.returnType?.isNullable() == true) {
+              report(
+                CodeSmell(
+                  issue,
+                  Entity.from(parameter),
+                  "Hibernate collection property cannot be nullable."
+                )
+              )
+            }
+          }
+        }
+      }
+    }
+  }
 
   override fun visitBinaryExpression(expression: KtBinaryExpression) {
     super.visitBinaryExpression(expression)
@@ -667,6 +722,14 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
         val selectorExpression = expression.selectorExpression as? KtNameReferenceExpression ?: return false
         val targets = selectorExpression.getReferenceTargets(bindingContext)
         targets.filterIsInstance<PropertyDescriptor>().firstOrNull()?.getAllAssociatedAnnotations()
+      }
+
+      is KtProperty -> {
+        expression.getPropertyDescriptor(bindingContext)?.getAllAssociatedAnnotations()
+      }
+
+      is KtParameter -> {
+        expression.getVariableDescriptor(bindingContext)?.annotations?.mapNotNull { it.fqName?.asString() }
       }
 
       else -> null

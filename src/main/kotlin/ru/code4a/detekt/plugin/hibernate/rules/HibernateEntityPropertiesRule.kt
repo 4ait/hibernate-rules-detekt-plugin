@@ -7,11 +7,16 @@ import io.gitlab.arturbosch.detekt.api.Entity
 import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
+import org.jetbrains.kotlin.descriptors.ClassDescriptor
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtParameter
 import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.psi.psiUtil.isPropertyParameter
 import org.jetbrains.kotlin.psi.psiUtil.visibilityModifierTypeOrDefault
+import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
+import ru.code4a.detekt.plugin.hibernate.extentions.psi.getClassDescriptor
+import ru.code4a.detekt.plugin.hibernate.extentions.psi.hasAnnotationAnyOf
 
 /**
  * Checks that all properties in classes with @Entity annotation are private and var.
@@ -41,13 +46,21 @@ class HibernateEntityPropertiesRule(config: Config = Config.empty) : Rule(config
     Debt.FIVE_MINS
   )
 
+  /**
+   * Annotations that define an entity.
+   */
+  private val entityAnnotations = setOf(
+    "jakarta.persistence.Entity",
+    "javax.persistence.Entity"
+  )
+
+  private val entityAnnotationsFqNames = entityAnnotations.map { FqName(it) }.toSet()
+
   override fun visitClass(klass: KtClass) {
     super.visitClass(klass)
 
     // Check if the class has @Entity annotation
-    val isEntity = klass.annotationEntries.any { annotation ->
-      annotation.shortName?.asString() == "Entity"
-    }
+    val isEntity = klass.hasAnnotationAnyOf(bindingContext, entityAnnotationsFqNames)
 
     if (isEntity) {
       klass.body?.properties?.forEach { property ->

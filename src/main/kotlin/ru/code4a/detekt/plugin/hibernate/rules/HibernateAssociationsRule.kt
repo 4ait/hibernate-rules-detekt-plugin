@@ -35,6 +35,7 @@ import org.jetbrains.kotlin.resolve.bindingContextUtil.getReferenceTargets
 import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.jvm.annotations.findJvmFieldAnnotation
+import ru.code4a.detekt.plugin.hibernate.extentions.psi.getAllAssociatedAnnotations
 
 /**
  * This rule detects direct mutations of Hibernate association fields.
@@ -205,6 +206,27 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
 
   override fun visitBinaryExpression(expression: KtBinaryExpression) {
     super.visitBinaryExpression(expression)
+
+    // Skip equality checks (== and !=) and elvis operator (left side)
+    // These are read operations, not mutations
+    if (expression.operationToken in setOf(KtTokens.EQEQ, KtTokens.EXCLEQ, KtTokens.ELVIS)) {
+      // For elvis operator, we only need to check the right side
+      if (expression.operationToken == KtTokens.ELVIS) {
+        val right = expression.right ?: return
+
+        // Check if the right side is a direct reference to a Hibernate collection
+        if (!isSafeOperation(right) && isHibernateCollectionField(right)) {
+          report(
+            CodeSmell(
+              issue,
+              Entity.from(expression),
+              "Using Hibernate collection directly with elvis operator is not allowed. Use a copy instead."
+            )
+          )
+        }
+      }
+      return
+    }
 
     // Check only assignments
     if (expression.operationToken !in setOf(
@@ -653,36 +675,6 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
     return annotations.any { annotation ->
       collectionAnnotations.contains(annotation)
     }
-  }
-
-  fun PropertyDescriptor.getAllAssociatedAnnotations(): List<String> {
-    // Check annotations on the property itself
-    val propertyAnnotations = annotations.mapNotNull { it.fqName?.asString() }
-
-    // Check annotations on constructor parameter if this is a constructor property
-    val constructorParameterAnnotations = backingField?.annotations?.mapNotNull {
-      it.fqName?.asString()
-    } ?: emptyList()
-
-    // Check if this is a primary constructor property parameter
-    val primaryCtorParamAnnotations =
-      if (containingDeclaration is ClassDescriptor) {
-        val classDescriptor = containingDeclaration as ClassDescriptor
-        val primaryCtor = classDescriptor.constructors.firstOrNull { it.isPrimary }
-
-        primaryCtor?.valueParameters
-          ?.find {
-            it.name == name
-          }
-          ?.annotations
-          ?.mapNotNull {
-            it.fqName?.asString()
-          } ?: emptyList()
-      } else {
-        emptyList()
-      }
-
-    return propertyAnnotations + constructorParameterAnnotations + primaryCtorParamAnnotations
   }
 
   companion object {

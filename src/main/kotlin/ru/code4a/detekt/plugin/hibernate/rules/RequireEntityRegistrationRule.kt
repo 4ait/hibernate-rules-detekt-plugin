@@ -98,8 +98,6 @@ class RequireEntityRegistrationRule(config: Config) : Rule(config) {
     if (parent is KtDotQualifiedExpression && parent.receiverExpression == expression) {
       val selectorExpression = parent.selectorExpression as? KtCallExpression ?: return false
 
-      println(selectorExpression.text)
-
       // Check if it's our target method through bindingContext
       val resolvedCall = selectorExpression.getResolvedCall(bindingContext) ?: return false
       val fqName = resolvedCall.resultingDescriptor.fqNameOrNull()?.asString() ?: return false

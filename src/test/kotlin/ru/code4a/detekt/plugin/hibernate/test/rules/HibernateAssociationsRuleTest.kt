@@ -845,4 +845,89 @@ class HibernateAssociationsRuleTest(
 
     Assertions.assertEquals(0, finding.size) // Should find no violations
   }
+
+  @Test
+  fun `should allow direct access in if`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class ManyToOne
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.ManyToOne
+
+                @Entity
+                class Parent {
+                    @ManyToOne
+                    private var children: Child? = null
+
+                    fun allowed(child: Child) {
+                        if(this.children != null) {
+                           // some processing
+                        }
+
+                       if(children != null) {
+                           // some processing
+                        }
+                    }
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(0, finding.size)
+  }
+
+  @Test
+  fun `should allow direct access in elvis`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class ManyToOne
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.ManyToOne
+
+                @Entity
+                class Parent {
+                    @ManyToOne
+                    private var children: Child? = null
+
+                    fun getChildOrThis(): Any = this.children ?: this
+                    fun getChildOrThis2(): Any = children ?: this
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(0, finding.size)
+  }
 }

@@ -1,4 +1,4 @@
-# Hibernate Detekt Rules
+# Hibernate Rules Detekt Plugin
 
 A custom set of [Detekt](https://github.com/detekt/detekt) static analysis rules for enforcing best practices when
 working with Hibernate/JPA in Kotlin applications.
@@ -28,7 +28,7 @@ plugins {
 }
 
 dependencies {
-  detektPlugins("ru.code4a:detekt-hibernate-rules:<version>")
+  detektPlugins("ru.code4a:hibernate-rules-detekt-plugin:<version>")
 }
 ```
 
@@ -38,7 +38,7 @@ dependencies {
 
 <dependency>
   <groupId>ru.code4a</groupId>
-  <artifactId>detekt-hibernate-rules</artifactId>
+  <artifactId>hibernate-rules-detekt-plugin</artifactId>
   <version>[version]</version>
 </dependency>
 ```
@@ -75,7 +75,7 @@ foura_hibernate_rule_set:
 @Entity
 class Parent {
   @OneToMany
-  private val children: MutableList<Child> = mutableListOf()
+  private var children: MutableList<Child> = mutableListOf()
 
   fun addChild(child: Child) {
     children.add(child) // Violation: direct modification
@@ -93,11 +93,12 @@ class Parent {
 @Entity
 class Parent {
   @OneToMany
-  private val children: MutableList<Child> = mutableListOf()
+  private var children: MutableList<Child> = mutableListOf()
 
   fun addChild(child: Child) {
     val copy = ArrayList(children)
     copy.add(child)
+    children = copy
   }
 
   fun getChildren(): List<Child> {
@@ -212,6 +213,13 @@ foura_hibernate_rule_set:
     active: true
     requiredStaticMethod: "com.example.EntityTracker.register"
 ```
+
+## Kotlin & Detekt Compatibility
+
+This plugin is compatible with:
+
+- Kotlin 1.9.x
+- Detekt version specified in your project configuration
 
 # Contributing
 

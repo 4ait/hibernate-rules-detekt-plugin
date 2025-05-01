@@ -930,4 +930,147 @@ class HibernateAssociationsRuleTest(
 
     Assertions.assertEquals(0, finding.size)
   }
+
+  @Test
+  fun `should not allow return without copy`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class OneToMany
+        """.trimIndent(),
+        """
+          package kotlin.collections
+
+          class ArrayList
+          class MutableList<T>
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.OneToMany
+               import kotlin.collections.ArrayList
+               import kotlin.collections.MutableList
+
+                @Entity
+                class Parent {
+                    @OneToMany
+                    private val children: MutableList<Child> = mutableListOf()
+
+                    fun getChilds(): Collection<Child> = children
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(1, finding.size)
+  }
+
+  @Test
+  fun `should not allow return without copy with this`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class OneToMany
+        """.trimIndent(),
+        """
+          package kotlin.collections
+
+          class ArrayList
+          class MutableList<T>
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.OneToMany
+               import kotlin.collections.ArrayList
+               import kotlin.collections.MutableList
+
+                @Entity
+                class Parent {
+                    @OneToMany
+                    private val children: MutableList<Child> = mutableListOf()
+
+                    fun getChilds(): Collection<Child> = this.children
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(1, finding.size)
+  }
+
+  @Test
+  fun `should allow return with copy with this`() {
+    @Language("kotlin")
+    val fileContents =
+      listOf(
+        """
+          package javax.persistence
+
+          annotation class Entity
+          annotation class OneToMany
+        """.trimIndent(),
+        """
+          package kotlin.collections
+
+          class ArrayList
+          class MutableSet<T>
+          fun Collection<T>.toSet(): Collection<T> {
+                         TODO()
+                        }
+
+        """.trimIndent(),
+        """
+               import javax.persistence.Entity
+               import javax.persistence.OneToMany
+               import kotlin.collections.ArrayList
+               import kotlin.collections.MutableList
+               import kotlin.collections.toSet
+
+                @Entity
+                class Parent {
+                    @OneToMany
+                    private val children: MutableSet<Child> = mutableSetOf()
+
+                    fun getChilds(): Collection<Child> = this.children.toSet()
+                }
+
+                @Entity
+                class Child
+        """.trimIndent()
+      )
+
+    val finding =
+      HibernateAssociationsRule(
+        TestConfig(
+          Pair("active", "true")
+        )
+      ).lintAllWithContextAndPrint(env, fileContents)
+
+    Assertions.assertEquals(0, finding.size)
+  }
 }

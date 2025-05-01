@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.psi.KtIfExpression
 import org.jetbrains.kotlin.psi.KtLambdaExpression
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
+import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtParameter
 import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.psi.KtPropertyAccessor
@@ -288,6 +289,29 @@ class HibernateAssociationsRule(config: Config = Config.empty) : Rule(config) {
           }
         }
       }
+    }
+  }
+
+  override fun visitNamedFunction(function: KtNamedFunction) {
+    super.visitNamedFunction(function)
+
+    // Check if this is an expression body function (using = syntax)
+    val bodyExpression = function.bodyExpression ?: return
+
+    // Skip checking if the body is a safe operation
+    if (isSafeOperation(bodyExpression)) {
+      return
+    }
+
+    // Check if the function body directly returns a Hibernate collection
+    if (isHibernateCollectionField(bodyExpression)) {
+      report(
+        CodeSmell(
+          issue,
+          Entity.from(function),
+          "Returning Hibernate collection directly from a function is not allowed. Return a copy instead."
+        )
+      )
     }
   }
 

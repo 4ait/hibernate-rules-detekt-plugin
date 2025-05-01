@@ -545,7 +545,7 @@ class HibernateAssociationsRuleCompleteTest(
       TestConfig("active" to "true")
     ).lintAllWithContextAndPrint(env, fileContents)
 
-    Assertions.assertEquals(6, findings.size)
+    Assertions.assertEquals(7, findings.size)
   }
 
   @Test
